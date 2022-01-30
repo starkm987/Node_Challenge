@@ -38,6 +38,8 @@ npm install --save-dev jest
 NOTES ABOUT THE PROJECT:
 
 Can read only one pair of un-nested brackets per line from the text file - multiple un-nested brackets will probably cause errors.
+
 Does not listen for stream if no input file is given, so script ends after it is executed.
+
 Util.js is used for testing functions.
 
