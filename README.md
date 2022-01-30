@@ -5,5 +5,5 @@ Installation:
 
 -run npm install [package name]
 
-
+-run node app.js to start the script
 
