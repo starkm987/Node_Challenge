@@ -1,7 +1,8 @@
 # Node_Challenge
 Installation:
 
--download package
+-download package zip or clone repository
+
 -run npm install [package name]
 
 
