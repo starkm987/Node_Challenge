@@ -27,6 +27,12 @@ npm install jsdom
 
 npm install prompt
 
+TESTING FRAMEWORK
+
+-JEST
+
+npm install --save-dev jest
+
 NOTES ABOUT THE PROJECT:
 
 
