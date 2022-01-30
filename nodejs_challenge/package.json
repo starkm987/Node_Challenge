@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "axios": "^0.25.0",
+    "axios-retry": "^3.2.4",
+    "jsdom": "^19.0.0",
+    "package.json": "^2.0.1",
+    "prompt": "^1.2.1"
+  },
+  "name": "nodejs_challenge",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "jest": "^27.4.7"
+  }
+}
