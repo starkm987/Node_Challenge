@@ -9,6 +9,8 @@ INSTALL:
 
 -run node app.js to start the script
 
+-for testing run npm test after installing Jest 
+
 DEPENDENCIES:
 
 -AXIOS 
