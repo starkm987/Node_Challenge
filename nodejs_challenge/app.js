@@ -14,7 +14,7 @@ const emailReg = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)
 const secret_present = 'IM_SECRET';
 const sha256Hasher = crypto.createHmac("sha256", secret_present);
 
-//variables for storing filtered data
+//global variables - used to avoid issues with scope for this project
 let urlFiltered = '';
 let urlValid = ''; 
 let titleFiltered = '';
@@ -25,28 +25,33 @@ let filename = '';
 /** Function for getting user input through the command line
  * sets filename as parameter for the file system read sync, then parses the input data from the file and makes a GET request
 */
-
 function prompter(){
   
   prompt.start();
 
+  prompt.message = 'Enter filename: ';
+  
   // get input argument using command line prompt
-  prompt.get(['path'], function (err, result) {
+  prompt.get(['userInput'], function (err, result) {
   if (err) {
     return onErr(err);
   }
   
-  filename = result.path; //set result of user input
+  //set result of user input as filename parameter for parsing function
+  filename = result.userInput; 
 
   try{
+    //read the file with the filename parameter, with the relative path
+    const d = fs.readFileSync("./" + filename).toString(); 
     
-    const d = fs.readFileSync("./" + filename).toString(); //read the file with the filename parameter, with the relative path
-
-    urlFiltered = inputParser(d); //parse data from text file using the parser function to an array
-
-    urlValid = validateUrl(urlFiltered); //check if obtained URL is of valid format using validate url function
-
-    getReq(); //run GET request with provided url
+    //parse data from text file using the parser function to an array
+    urlFiltered = inputParser(d); 
+    
+    //check if obtained URL is of valid format using validate url function
+    urlValid = validateUrl(urlFiltered); 
+    
+    //run GET request with provided url
+    getReq(urlValid); 
 
   }  
   catch(err)
@@ -60,7 +65,7 @@ function prompter(){
  *  uses Axios http client for the get function, and Axios-retry for handling the response
  *  JSDOM is used for obtaining the response DOM structure, to obtain the Title element value  
  */
-function getReq(){
+function getReq(validUrl){
   
   //set request retries to 1 with a delay of 60 seconds
   axiosRetry(axios, { retries: 1, retryDelay: (retryCount) => {
@@ -68,30 +73,37 @@ function getReq(){
   }});
 
   try{
-    axios.get(urlValid)
+    axios.get(validUrl)
       .then(function (response) {
-          
-      const dom = new jsdom.JSDOM(response.data); //obtain DOM from the response data
       
-      const element = dom.window.document.title; //extract the Title from the DOM, if no title is found set output title to null
+        //obtain DOM access from the response data    
+      const dom = new jsdom.JSDOM(response.data); 
+      
+      //extract the Title from the DOM, if no title is found set output title to null
+      const element = dom.window.document.title; 
         if (element) {
           titleFiltered = element;
         }
         else{
           titleFiltered = null;
         }
-          
-      let email = response.data.match(emailReg); // obtain email addresses with regex pattern of the response data, store it in an array
+      
+        // obtain email addresses with regex pattern of the response data, store it in an array    
+      let email = response.data.match(emailReg); 
         
         //check if there is an email present in the email array
         if(email !== null)
-        {
-          let firstEmail = email[0]; //obtain first email address in the input array
-          hash = sha256Hasher.update(firstEmail).digest("hex"); // hash obtained value using sha256 hasher, outputted as hex
+        { 
+          //obtain first email address in the input array
+          let firstEmail = email[0]; 
+
+          // hash obtained value using sha256 hasher, outputted as hex
+          hash = sha256Hasher.update(firstEmail).digest("hex"); 
         }
         else
         {
-          hash = null; //set output email to null if not found
+          //set output email to null if not found
+          hash = null; 
         }
         
         //prepare obtained data as JSON
@@ -103,11 +115,13 @@ function getReq(){
     })
     .catch(function (error) {
       
-      console.error(error); //log error to stderr    
+      //log error to stderr 
+      console.error(error);    
     })
     .finally(function () {
-             
-      const outputData = clean(outputJSON); //remove null key value pairs from JSON and prepare for write
+        
+      //remove null key value pairs from JSON and prepare for write
+      const outputData = clean(outputJSON); 
       
       //write output JSON table to text file in project folder, named Output.txt
       fs.writeFile('output', outputData, (err) => {
@@ -127,18 +141,23 @@ function getReq(){
  *  returns a url to be validated and used as a parameter in the http request
  */
 function inputParser(inputData) {
-  
-    let escapeArr = inputData.replace(escReg, ''); //check input data for an escape character
     
-    let result = escapeArr.match(reg); // after checking for escape characters, use regex to detect brackets
+  //check input data for an escape character
+    let escapeArr = inputData.replace(escReg, ''); 
+    
+    // after checking for escape characters, use regex to detect brackets
+    let result = escapeArr.match(reg); 
     if (result !== null) { 
       result.forEach(element => 
         {
-          let subArr = element.replace(repReg, ''); //filter out all nested brackets
-                    
-          let subUrl = subArr.match(urlReg); //use regex pattern to find urls and write them to a list
-                   
-          url = subUrl[subUrl.length-1]; //use the last element of the url list as output url
+          //filter out all nested brackets
+          let subArr = element.replace(repReg, ''); 
+          
+          //use regex pattern to find urls and write them to a list
+          let subUrl = subArr.match(urlReg); 
+           
+          //use the last element of the url list as output url
+          url = subUrl[subUrl.length-1]; 
                   
         }
       );
@@ -146,6 +165,7 @@ function inputParser(inputData) {
       return url;
     }
     else {
+      
       // if there are no adresses found with regex, default the url to www.google.com
       console.log('URL not found, defaulting to www.google.com');
       url = 'www.google.com';
@@ -165,13 +185,14 @@ function validateUrl(inputUrl) {
   return inputUrl;
 }
 
-/** Function for removing null fields from JSON table */
+/** Function for removing null fields from output JSON table */
 function clean(text) {
   let o = Object.fromEntries(Object.entries(text).filter(([_, v]) => v != null));
   let output = JSON.stringify(o);
   return output;
 }
 
-prompter(); //run script
+//run script
+prompter(); 
 
 module.exports = { inputParser, validateUrl }; 
