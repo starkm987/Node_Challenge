@@ -41,5 +41,5 @@ Can read only one pair of un-nested brackets per line from the text file - multi
 
 Does not listen for stream if no input file is given, script ends after it is executed. 
 
-Util.js is used for testing functions.
+inputParser.test.js is unit test for parser, uses util.js
 
